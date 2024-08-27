@@ -1,8 +1,10 @@
 package main
 
 import (
+	"math/rand"
 	"randomsentensbot/core"
 	"randomsentensbot/misskey"
+	"time"
 )
 
 func main() {
@@ -23,7 +25,26 @@ func main() {
 	}
 
 	mk := misskey.NewMisskeyTools(config.MisskeyToken, config.MisskeyServer)
-	presult := predictr.PredictSeq(config.StartTopic, 0)
+
+	rand.Seed(time.Now().Unix())
+	topic := config.StartTopic[rand.Intn(len(config.StartTopic))]
+
+	if topic == "random" {
+		pick := func(length int, dict core.UnigramProabilityCollections) string {
+			rndn := rand.Intn(length)
+			for key := range dict {
+				if rndn == 0 {
+					return key
+				}
+				rndn--
+			}
+			panic("unreachable!")
+		}
+
+		topic = pick(len(predictr.UniModelProb), predictr.UniModelProb)
+	}
+
+	presult := predictr.PredictSeq(topic, 0)
 
 	mk.SendNote(presult.Result, vrange)
 }

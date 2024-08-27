@@ -6,11 +6,11 @@ import (
 )
 
 type Config struct {
-	MisskeyToken  string `json:"mktoken"`
-	MisskeyServer string `json:"mkserver"`
-	ViewRange     string `json:"range"`
-	StartTopic    string `json:"starttopic"`
-	DataPath      string `json:"dataname"`
+	MisskeyToken  string   `json:"mktoken"`
+	MisskeyServer string   `json:"mkserver"`
+	ViewRange     string   `json:"range"`
+	StartTopic    []string `json:"starttopic"`
+	DataPath      string   `json:"dataname"`
 }
 
 func ReadConfig() Config {
