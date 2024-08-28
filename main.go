@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"randomsentensbot/core"
 	"randomsentensbot/misskey"
@@ -46,5 +47,6 @@ func main() {
 
 	presult := predictr.PredictSeq(topic, 0)
 
+	fmt.Println(presult)
 	mk.SendNote(presult.Result, vrange)
 }

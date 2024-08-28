@@ -10,7 +10,7 @@ type Config struct {
 	MisskeyServer string   `json:"mkserver"`
 	ViewRange     string   `json:"range"`
 	StartTopic    []string `json:"starttopic"`
-	DataPath      string   `json:"dataname"`
+	DataPath      []string `json:"dataname"`
 }
 
 func ReadConfig() Config {
