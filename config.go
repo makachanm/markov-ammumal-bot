@@ -13,8 +13,8 @@ type Config struct {
 	DataPath      []string `json:"dataname"`
 }
 
-func ReadConfig() Config {
-	data, err := os.ReadFile("./config.json")
+func ReadConfig(path string) Config {
+	data, err := os.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}

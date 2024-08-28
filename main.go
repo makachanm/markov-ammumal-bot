@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"math/rand"
 	"randomsentensbot/core"
@@ -9,7 +10,10 @@ import (
 )
 
 func main() {
-	config := ReadConfig()
+	configpath := flag.String("c", "./config.json", "path of configuration file")
+	flag.Parse()
+
+	config := ReadConfig(*configpath)
 	predictr := core.Predictor(config.DataPath)
 
 	var vrange misskey.ViewRange
