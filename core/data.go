@@ -61,6 +61,8 @@ func PreloadPredictor(file []byte) PredictionGenerator {
 	}
 
 	sm.TokenProabilityWeight = ubmx.UniModel
+	sm.Pretrained = true
+
 	bm := UnserializeBigram(ubmx.BiModel)
 
 	tg := NewPredictionGenerator(sm, bm)
@@ -85,7 +87,7 @@ func PreanalysisData(paths []string, writer *os.File) {
 		notes = append(notes, nd...)
 	}
 
-	fmt.Println("Making pre-analysised dxata....")
+	fmt.Println("Making pre-analysised data....")
 
 	sm := NewUniGramModel()
 	bm := NewBiGramModel()
@@ -109,5 +111,8 @@ func PreanalysisData(paths []string, writer *os.File) {
 		log.Fatal(err)
 	}
 
-	writer.Write(data)
+	_, ferr := writer.Write(data)
+	if ferr != nil {
+		panic(err)
+	}
 }

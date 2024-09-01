@@ -50,6 +50,7 @@ func SerializeBigram(cl BiGramModel) SerializedBigramProabilityCollection {
 
 func UnserializeBigram(cl SerializedBigramProabilityCollection) BiGramModel {
 	unsriz := NewBiGramModel()
+	unsriz.Pretrained = true
 
 	for _, val := range cl.Datas {
 		unsriz.TokenProabilityWeight[BiGramTokenTuple{FirstToken: val.FirstToken, NextToken: val.NextToken}] = val.Index

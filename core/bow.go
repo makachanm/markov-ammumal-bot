@@ -17,6 +17,8 @@ type UniGramModel struct {
 	tokenAppearContext uniGramContextTokenAppears
 
 	TokenProabilityWeight UnigramProabilityCollections `json:"weight"`
+
+	Pretrained bool
 }
 
 func NewUniGramModel() UniGramModel {
@@ -24,6 +26,7 @@ func NewUniGramModel() UniGramModel {
 		tokenProability:       make(UnigramProabilityCollections),
 		TokenProabilityWeight: make(UnigramProabilityCollections),
 		tokenAppearContext:    make(uniGramContextTokenAppears),
+		Pretrained:            false,
 	}
 }
 
@@ -82,7 +85,7 @@ func (nm *UniGramModel) Update(str string) {
 }
 
 func (nm *UniGramModel) GetProabilityWeight() UnigramProabilityCollections {
-	if len(nm.TokenProabilityWeight) >= 0 {
+	if nm.Pretrained {
 		return nm.TokenProabilityWeight
 	}
 
@@ -120,6 +123,8 @@ type BiGramModel struct {
 	tokenAppearContext biGramContextTokenAppears
 
 	TokenProabilityWeight BigramProabilityCollections
+
+	Pretrained bool
 }
 
 func NewBiGramModel() BiGramModel {
@@ -128,6 +133,7 @@ func NewBiGramModel() BiGramModel {
 		tokenAppearContext: make(biGramContextTokenAppears),
 
 		TokenProabilityWeight: make(BigramProabilityCollections),
+		Pretrained:            false,
 	}
 }
 
@@ -186,7 +192,7 @@ func (nm *BiGramModel) Update(str string) {
 }
 
 func (nm *BiGramModel) GetProabilityWeight() BigramProabilityCollections {
-	if len(nm.TokenProabilityWeight) >= 0 {
+	if nm.Pretrained {
 		return nm.TokenProabilityWeight
 	}
 
