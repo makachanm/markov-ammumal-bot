@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
+	"os"
 	"randomsentensbot/core"
 	"randomsentensbot/misskey"
 	"time"
@@ -11,10 +12,33 @@ import (
 
 func main() {
 	configpath := flag.String("c", "./config.json", "path of configuration file")
+	runpretrain := flag.Bool("pt", false, "run pretrain and save to file")
+	pretrainname := flag.String("ptf", "data.json", "name of pretrained file")
+
 	flag.Parse()
 
 	config := ReadConfig(*configpath)
-	predictr := core.Predictor(config.DataPath)
+
+	if *runpretrain {
+		pretrain(config, *pretrainname)
+		return
+	}
+
+	var predictr core.PredictionGenerator
+
+	if !config.Pretrain.UsePretrain {
+		fmt.Println("Running with Hotload")
+		predictr = core.Predictor(config.DataPath)
+	} else {
+		fmt.Println("Running with Pretrain")
+
+		d, pderr := os.ReadFile(config.Pretrain.DataPath)
+		if pderr != nil {
+			panic(pderr)
+		}
+
+		predictr = core.PreloadPredictor(d)
+	}
 
 	var vrange misskey.ViewRange
 
@@ -53,4 +77,14 @@ func main() {
 
 	fmt.Println(presult)
 	mk.SendNote(presult.Result, vrange)
+}
+
+func pretrain(c Config, name string) {
+	unifile, fuerr := os.Create(name)
+	if fuerr != nil {
+		panic(fuerr)
+	}
+	defer unifile.Close()
+
+	core.PreanalysisData(c.DataPath, unifile)
 }

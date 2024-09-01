@@ -11,6 +11,13 @@ type Config struct {
 	ViewRange     string   `json:"range"`
 	StartTopic    []string `json:"starttopic"`
 	DataPath      []string `json:"dataname"`
+
+	Pretrain configPreTrain `json:"pretrain"`
+}
+
+type configPreTrain struct {
+	UsePretrain bool   `json:"usepretrain"`
+	DataPath    string `json:"path"`
 }
 
 func ReadConfig(path string) Config {

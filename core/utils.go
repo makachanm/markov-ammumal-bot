@@ -29,3 +29,31 @@ func freqInArray(x string, a []string) int {
 
 	return q
 }
+
+func SerializeBigram(cl BiGramModel) SerializedBigramProabilityCollection {
+	seriz := SerializedBigramProabilityCollection{
+		Datas: make([]SerializedBigramProabilityCollectionAtom, 0),
+	}
+
+	for key, val := range cl.GetProabilityWeight() {
+		obj := SerializedBigramProabilityCollectionAtom{
+			FirstToken: key.FirstToken,
+			NextToken:  key.NextToken,
+			Index:      val,
+		}
+
+		seriz.Datas = append(seriz.Datas, obj)
+	}
+
+	return seriz
+}
+
+func UnserializeBigram(cl SerializedBigramProabilityCollection) BiGramModel {
+	unsriz := NewBiGramModel()
+
+	for _, val := range cl.Datas {
+		unsriz.TokenProabilityWeight[BiGramTokenTuple{FirstToken: val.FirstToken, NextToken: val.NextToken}] = val.Index
+	}
+
+	return unsriz
+}
