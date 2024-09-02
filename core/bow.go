@@ -32,8 +32,8 @@ func NewUniGramModel() UniGramModel {
 
 func (nm *UniGramModel) gramlize(str string) [][]string {
 	//will be replaced by improved lexer.
-	lowered := strings.ToLower(str)
-	splited := strings.Split(lowered, " ")
+	str = strings.ToLower(str)
+	splited := strings.Split(str, " ")
 
 	var bigram_collections = make([][]string, 0)
 

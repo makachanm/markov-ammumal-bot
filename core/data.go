@@ -2,123 +2,79 @@ package core
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
-)
 
-type DNotes struct {
-	Text       string `json:"text"`
-	Visibility string `json:"visibility"`
-}
+	"github.com/tidwall/gjson"
+)
 
 type modelData struct {
 	BiModel  SerializedBigramProabilityCollection `json:"bi"`
 	UniModel UnigramProabilityCollections         `json:"uni"`
 }
 
-func Predictor(paths []string) PredictionGenerator {
-	var notes []DNotes = make([]DNotes, 0)
+var (
+	sm UniGramModel
+	bm BiGramModel
+)
+
+func init() {
+	sm = NewUniGramModel()
+	bm = NewBiGramModel()
+}
+
+func generalLoader(paths []string, textPath string) {
+	var texts []string = make([]string, 0)
 
 	for _, data := range paths {
-		bd, fe := os.ReadFile(data)
-		if fe != nil {
-			panic(fe)
+		bytes, err := os.ReadFile(data)
+		if err != nil {
+			panic(err)
 		}
 
-		var nd []DNotes
-		xe := json.Unmarshal(bd, &nd)
-		if xe != nil {
-			panic(xe)
+		values := gjson.Get(string(bytes), textPath)
+		for _, value := range values.Array() {
+			texts = append(texts, value.String())
 		}
-
-		notes = append(notes, nd...)
 	}
 
-	notes = filterNotes(notes)
-
-	sm := NewUniGramModel()
-	bm := NewBiGramModel()
-
-	fmt.Println("Updating Data....")
-
-	for _, av := range notes {
-		bm.Update(av.Text)
+	for _, text := range texts {
+		bm.Update(text)
+		sm.Update(text)
 	}
-	for _, av := range notes {
-		sm.Update(av.Text)
-	}
-
-	tg := NewPredictionGenerator(sm, bm)
-	return tg
 }
 
-
-func filterNotes(notes []DNotes) []DNotes {
-	var nnotes []DNotes = make([]DNotes, 0)
-
-	for _, av := range notes {
-		if av.Visibility != "specified" {
-			nnotes = append(nnotes, av)
-		}
-	}
-
-	return nnotes
+func LoadMisskey(paths []string) {
+	generalLoader(paths, `#(visibility!="specified")#.text`)
 }
 
-func PreloadPredictor(file []byte) PredictionGenerator {
-	sm := NewUniGramModel()
+func LoadTwitter(paths []string) {
+	generalLoader(paths, `#.tweet.full_text`)
+}
 
+func LoadPretrain(path string) {
 	ubmx := modelData{}
 
-	jerr := json.Unmarshal(file, &ubmx)
-	if jerr != nil {
-		panic(jerr)
+	file, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(file, &ubmx)
+	if err != nil {
+		panic(err)
 	}
 
 	sm.TokenProabilityWeight = ubmx.UniModel
 	sm.Pretrained = true
-
-	bm := UnserializeBigram(ubmx.BiModel)
-
-	tg := NewPredictionGenerator(sm, bm)
-	return tg
+	bm = UnserializeBigram(ubmx.BiModel)
 }
 
-func PreanalysisData(paths []string, writer *os.File) {
-	var notes []DNotes = make([]DNotes, 0)
+func GetPredictr() PredictionGenerator {
+	return NewPredictionGenerator(sm, bm)
+}
 
-	for _, data := range paths {
-		bd, fe := os.ReadFile(data)
-		if fe != nil {
-			panic(fe)
-		}
-
-		var nd []DNotes
-		xe := json.Unmarshal(bd, &nd)
-		if xe != nil {
-			panic(xe)
-		}
-
-		notes = append(notes, nd...)
-	}
-  
-  notes = filterNotes(notes)
-
-	fmt.Println("Making pre-analysised data....")
-
-	sm := NewUniGramModel()
-	bm := NewBiGramModel()
-
-	fmt.Println("Updating Data....")
-
-	for _, av := range notes {
-		bm.Update(av.Text)
-	}
-	for _, av := range notes {
-		sm.Update(av.Text)
-	}
-
+func PreanalysisData(writer *os.File) {
 	model := modelData{
 		UniModel: sm.GetProabilityWeight(),
 		BiModel:  SerializeBigram(bm),

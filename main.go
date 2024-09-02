@@ -4,10 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"os"
 	"randomsentensbot/core"
 	"randomsentensbot/misskey"
-	"time"
+	"strings"
 )
 
 func main() {
@@ -28,17 +29,21 @@ func main() {
 
 	if !config.Pretrain.UsePretrain {
 		fmt.Println("Running with Hotload")
-		predictr = core.Predictor(config.DataPath)
+
+		if len(config.TwitterData) != 0 {
+			core.LoadTwitter(config.TwitterData)
+		}
+
+		if len(config.MisskeyData) != 0 {
+			core.LoadMisskey(config.MisskeyData)
+		}
 	} else {
 		fmt.Println("Running with Pretrain")
 
-		d, pderr := os.ReadFile(config.Pretrain.DataPath)
-		if pderr != nil {
-			panic(pderr)
-		}
-
-		predictr = core.PreloadPredictor(d)
+		core.LoadPretrain(config.Pretrain.DataPath)
 	}
+
+	predictr = core.GetPredictr()
 
 	var vrange misskey.ViewRange
 
@@ -55,28 +60,43 @@ func main() {
 
 	mk := misskey.NewMisskeyTools(config.MisskeyToken, config.MisskeyServer)
 
-	rand.Seed(time.Now().Unix())
 	topic := config.StartTopic[rand.Intn(len(config.StartTopic))]
 
 	if topic == "random" {
-		pick := func(length int, dict core.UnigramProabilityCollections) string {
-			rndn := rand.Intn(length)
-			for key := range dict {
-				if rndn == 0 {
-					return key
+		for {
+			pick := func(length int, dict core.UnigramProabilityCollections) string {
+				rndn := rand.Intn(length)
+				for key := range dict {
+					if rndn == 0 {
+						return key
+					}
+					rndn--
 				}
-				rndn--
+				panic("unreachable!")
 			}
-			panic("unreachable!")
-		}
 
-		topic = pick(len(predictr.UniModelProb), predictr.UniModelProb)
+			topic = pick(len(predictr.UniModelProb), predictr.UniModelProb)
+
+			if _, e := url.ParseRequestURI(topic); e != nil {
+				break
+			}
+		}
 	}
 
-	presult := predictr.PredictSeq(topic, 0)
+	var presult core.PredictionResult
+
+	presult = predictr.PredictSeq(topic, 0)
+
+	text := presult.Result
+
+	text = strings.ReplaceAll(text, "&amp;", "&")
+	text = strings.ReplaceAll(text, "&lt;", "<")
+	text = strings.ReplaceAll(text, "&gt;", ">")
+	text = strings.ReplaceAll(text, "&quot;", "\"")
+	text = strings.ReplaceAll(text, "&apos;", "'")
 
 	fmt.Println(presult)
-	mk.SendNote(presult.Result, vrange)
+	mk.SendNote(text, vrange)
 }
 
 func pretrain(c Config, name string) {
@@ -86,5 +106,13 @@ func pretrain(c Config, name string) {
 	}
 	defer unifile.Close()
 
-	core.PreanalysisData(c.DataPath, unifile)
+	if len(c.TwitterData) != 0 {
+		core.LoadTwitter(c.TwitterData)
+	}
+
+	if len(c.MisskeyData) != 0 {
+		core.LoadMisskey(c.MisskeyData)
+	}
+
+	core.PreanalysisData(unifile)
 }
