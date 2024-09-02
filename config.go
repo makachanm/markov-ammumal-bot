@@ -10,7 +10,8 @@ type Config struct {
 	MisskeyServer string   `json:"mkserver"`
 	ViewRange     string   `json:"range"`
 	StartTopic    []string `json:"starttopic"`
-	DataPath      []string `json:"dataname"`
+	MisskeyData   []string `json:"misskeyData"`
+	TwitterData   []string `json:"twitterData"`
 
 	Pretrain configPreTrain `json:"pretrain"`
 }

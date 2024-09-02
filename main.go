@@ -4,10 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"os"
 	"randomsentensbot/core"
 	"randomsentensbot/misskey"
-	"time"
+	"strings"
 )
 
 func main() {
@@ -28,17 +29,21 @@ func main() {
 
 	if !config.Pretrain.UsePretrain {
 		fmt.Println("Running with Hotload")
-		predictr = core.Predictor(config.DataPath)
+
+		if len(config.TwitterData) != 0 {
+			core.LoadTwitter(config.TwitterData)
+		}
+
+		if len(config.MisskeyData) != 0 {
+			core.LoadMisskey(config.MisskeyData)
+		}
 	} else {
 		fmt.Println("Running with Pretrain")
 
-		d, pderr := os.ReadFile(config.Pretrain.DataPath)
-		if pderr != nil {
-			panic(pderr)
-		}
-
-		predictr = core.PreloadPredictor(d)
+		core.LoadPretrain(config.Pretrain.DataPath)
 	}
+
+	predictr = core.GetPredictr()
 
 	var vrange misskey.ViewRange
 
@@ -55,7 +60,7 @@ func main() {
 
 	mk := misskey.NewMisskeyTools(config.MisskeyToken, config.MisskeyServer)
 
-	rand.Seed(time.Now().Unix())
+makeText:
 	topic := config.StartTopic[rand.Intn(len(config.StartTopic))]
 
 	if topic == "random" {
@@ -75,8 +80,20 @@ func main() {
 
 	presult := predictr.PredictSeq(topic, 0)
 
+	if _, e := url.ParseRequestURI(presult.Result); e == nil {
+		goto makeText
+	}
+
+	text := presult.Result
+
+	text = strings.ReplaceAll(text, "&amp;", "&")
+	text = strings.ReplaceAll(text, "&lt;", "<")
+	text = strings.ReplaceAll(text, "&gt;", ">")
+	text = strings.ReplaceAll(text, "&quot;", "\"")
+	text = strings.ReplaceAll(text, "&apos;", "'")
+
 	fmt.Println(presult)
-	mk.SendNote(presult.Result, vrange)
+	mk.SendNote(text, vrange)
 }
 
 func pretrain(c Config, name string) {
@@ -86,5 +103,5 @@ func pretrain(c Config, name string) {
 	}
 	defer unifile.Close()
 
-	core.PreanalysisData(c.DataPath, unifile)
+	core.PreanalysisData(c.TwitterData, unifile)
 }
