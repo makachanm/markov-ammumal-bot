@@ -16,14 +16,17 @@ type UniGramModel struct {
 	tokenProability    UnigramProabilityCollections
 	tokenAppearContext uniGramContextTokenAppears
 
-	tokenProabilityWeight UnigramProabilityCollections
+	TokenProabilityWeight UnigramProabilityCollections `json:"weight"`
+
+	Pretrained bool
 }
 
 func NewUniGramModel() UniGramModel {
 	return UniGramModel{
 		tokenProability:       make(UnigramProabilityCollections),
-		tokenProabilityWeight: make(UnigramProabilityCollections),
+		TokenProabilityWeight: make(UnigramProabilityCollections),
 		tokenAppearContext:    make(uniGramContextTokenAppears),
+		Pretrained:            false,
 	}
 }
 
@@ -82,9 +85,12 @@ func (nm *UniGramModel) Update(str string) {
 }
 
 func (nm *UniGramModel) GetProabilityWeight() UnigramProabilityCollections {
+	if nm.Pretrained {
+		return nm.TokenProabilityWeight
+	}
+
 	nm.calucateFullProability()
-	//nm.calculateTokenRelationship()
-	return nm.tokenProabilityWeight
+	return nm.TokenProabilityWeight
 }
 
 func (nm *UniGramModel) GetSize() int {
@@ -102,8 +108,8 @@ func (nm *UniGramModel) calucateFullProability() {
 	fmt.Println("Calculating Weight... \nSize: ", len(nm.tokenProability))
 	for keyprevtoken, internal_tokenmap := range nm.tokenProability {
 		for keynexttoken := range internal_tokenmap {
-			nm.tokenProabilityWeight[keyprevtoken] = make(map[string]float64)
-			nm.tokenProabilityWeight[keyprevtoken][keynexttoken] = nm.calculateTokenWeight(keyprevtoken, keynexttoken)
+			nm.TokenProabilityWeight[keyprevtoken] = make(map[string]float64)
+			nm.TokenProabilityWeight[keyprevtoken][keynexttoken] = nm.calculateTokenWeight(keyprevtoken, keynexttoken)
 		}
 	}
 }
@@ -116,7 +122,9 @@ type BiGramModel struct {
 	tokenProability    BigramProabilityCollections
 	tokenAppearContext biGramContextTokenAppears
 
-	tokenProabilityWeight BigramProabilityCollections
+	TokenProabilityWeight BigramProabilityCollections
+
+	Pretrained bool
 }
 
 func NewBiGramModel() BiGramModel {
@@ -124,7 +132,8 @@ func NewBiGramModel() BiGramModel {
 		tokenProability:    make(BigramProabilityCollections),
 		tokenAppearContext: make(biGramContextTokenAppears),
 
-		tokenProabilityWeight: make(BigramProabilityCollections),
+		TokenProabilityWeight: make(BigramProabilityCollections),
+		Pretrained:            false,
 	}
 }
 
@@ -183,8 +192,12 @@ func (nm *BiGramModel) Update(str string) {
 }
 
 func (nm *BiGramModel) GetProabilityWeight() BigramProabilityCollections {
+	if nm.Pretrained {
+		return nm.TokenProabilityWeight
+	}
+
 	nm.calucateFullProability()
-	return nm.tokenProabilityWeight
+	return nm.TokenProabilityWeight
 }
 
 func (nm *BiGramModel) GetSize() int {
@@ -202,8 +215,8 @@ func (nm *BiGramModel) calucateFullProability() {
 	fmt.Println("Calculating Weight... \nSize: ", len(nm.tokenProability))
 	for keyprevtoken, internal_tokenmap := range nm.tokenProability {
 		for keynexttoken := range internal_tokenmap {
-			nm.tokenProabilityWeight[keyprevtoken] = make(map[string]float64)
-			nm.tokenProabilityWeight[keyprevtoken][keynexttoken] = nm.calculateTokenWeight(keyprevtoken, keynexttoken)
+			nm.TokenProabilityWeight[keyprevtoken] = make(map[string]float64)
+			nm.TokenProabilityWeight[keyprevtoken][keynexttoken] = nm.calculateTokenWeight(keyprevtoken, keynexttoken)
 		}
 	}
 }

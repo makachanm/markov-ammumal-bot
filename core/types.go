@@ -20,3 +20,13 @@ type predictionResultSeqAtom struct {
 	Token      string
 	Proability float64
 }
+
+type SerializedBigramProabilityCollectionAtom struct {
+	FirstToken string             `json:"ft"`
+	NextToken  string             `json:"nt"`
+	Index      map[string]float64 `json:"weightmap"`
+}
+
+type SerializedBigramProabilityCollection struct {
+	Datas []SerializedBigramProabilityCollectionAtom `json:"datas"`
+}
