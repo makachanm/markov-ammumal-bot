@@ -63,29 +63,29 @@ func main() {
 	topic := config.StartTopic[rand.Intn(len(config.StartTopic))]
 
 	if topic == "random" {
-		pick := func(length int, dict core.UnigramProabilityCollections) string {
-			rndn := rand.Intn(length)
-			for key := range dict {
-				if rndn == 0 {
-					return key
+		for {
+			pick := func(length int, dict core.UnigramProabilityCollections) string {
+				rndn := rand.Intn(length)
+				for key := range dict {
+					if rndn == 0 {
+						return key
+					}
+					rndn--
 				}
-				rndn--
+				panic("unreachable!")
 			}
-			panic("unreachable!")
-		}
 
-		topic = pick(len(predictr.UniModelProb), predictr.UniModelProb)
+			topic = pick(len(predictr.UniModelProb), predictr.UniModelProb)
+
+			if _, e := url.ParseRequestURI(topic); e != nil {
+				break
+			}
+		}
 	}
 
 	var presult core.PredictionResult
 
-	for {
-		presult = predictr.PredictSeq(topic, 0)
-
-		if _, e := url.ParseRequestURI(presult.Result); e != nil {
-			break
-		}
-	}
+	presult = predictr.PredictSeq(topic, 0)
 
 	text := presult.Result
 
