@@ -32,8 +32,8 @@ func generalLoader(paths []string, textPath string) {
 			panic(err)
 		}
 
-		values := gjson.Get(string(bytes), textPath)
-		for _, value := range values.Array() {
+		values := gjson.GetMany(string(bytes), textPath)
+		for _, value := range values {
 			texts = append(texts, value.String())
 		}
 	}
@@ -45,7 +45,7 @@ func generalLoader(paths []string, textPath string) {
 }
 
 func LoadMisskey(paths []string) {
-	generalLoader(paths, `notes.#(visibility!="specified").text`)
+	generalLoader(paths, `#(visibility!="specified")#.text`)
 }
 
 func LoadTwitter(paths []string) {
