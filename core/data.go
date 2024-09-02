@@ -32,8 +32,8 @@ func generalLoader(paths []string, textPath string) {
 			panic(err)
 		}
 
-		values := gjson.GetMany(string(bytes), textPath)
-		for _, value := range values {
+		values := gjson.Get(string(bytes), textPath)
+		for _, value := range values.Array() {
 			texts = append(texts, value.String())
 		}
 	}
