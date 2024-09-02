@@ -8,7 +8,8 @@ import (
 )
 
 type DNotes struct {
-	Text string `json:"text"`
+	Text       string `json:"text"`
+	Visibility string `json:"visibility"`
 }
 
 type modelData struct {
@@ -34,6 +35,8 @@ func Predictor(paths []string) PredictionGenerator {
 		notes = append(notes, nd...)
 	}
 
+	notes = filterNotes(notes)
+
 	sm := NewUniGramModel()
 	bm := NewBiGramModel()
 
@@ -48,6 +51,19 @@ func Predictor(paths []string) PredictionGenerator {
 
 	tg := NewPredictionGenerator(sm, bm)
 	return tg
+}
+
+
+func filterNotes(notes []DNotes) []DNotes {
+	var nnotes []DNotes = make([]DNotes, 0)
+
+	for _, av := range notes {
+		if av.Visibility != "specified" {
+			nnotes = append(nnotes, av)
+		}
+	}
+
+	return nnotes
 }
 
 func PreloadPredictor(file []byte) PredictionGenerator {
@@ -86,6 +102,8 @@ func PreanalysisData(paths []string, writer *os.File) {
 
 		notes = append(notes, nd...)
 	}
+  
+  notes = filterNotes(notes)
 
 	fmt.Println("Making pre-analysised data....")
 
