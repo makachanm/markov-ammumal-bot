@@ -103,5 +103,13 @@ func pretrain(c Config, name string) {
 	}
 	defer unifile.Close()
 
-	core.PreanalysisData(c.TwitterData, unifile)
+	if len(c.TwitterData) != 0 {
+		core.LoadTwitter(c.TwitterData)
+	}
+
+	if len(c.MisskeyData) != 0 {
+		core.LoadMisskey(c.MisskeyData)
+	}
+
+	core.PreanalysisData(unifile)
 }

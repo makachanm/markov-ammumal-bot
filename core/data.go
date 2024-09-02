@@ -74,9 +74,7 @@ func GetPredictr() PredictionGenerator {
 	return NewPredictionGenerator(sm, bm)
 }
 
-func PreanalysisData(paths []string, writer *os.File) {
-	generalLoader(paths, `notes.#(visibility!="specified").text`)
-
+func PreanalysisData(writer *os.File) {
 	model := modelData{
 		UniModel: sm.GetProabilityWeight(),
 		BiModel:  SerializeBigram(bm),
