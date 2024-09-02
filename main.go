@@ -60,7 +60,6 @@ func main() {
 
 	mk := misskey.NewMisskeyTools(config.MisskeyToken, config.MisskeyServer)
 
-makeText:
 	topic := config.StartTopic[rand.Intn(len(config.StartTopic))]
 
 	if topic == "random" {
@@ -78,10 +77,14 @@ makeText:
 		topic = pick(len(predictr.UniModelProb), predictr.UniModelProb)
 	}
 
-	presult := predictr.PredictSeq(topic, 0)
+	var presult core.PredictionResult
 
-	if _, e := url.ParseRequestURI(presult.Result); e == nil {
-		goto makeText
+	for {
+		presult = predictr.PredictSeq(topic, 0)
+
+		if _, e := url.ParseRequestURI(presult.Result); e != nil {
+			break
+		}
 	}
 
 	text := presult.Result
