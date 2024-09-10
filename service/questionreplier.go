@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"randomsentensbot/core"
 	"randomsentensbot/misskey"
@@ -41,7 +42,10 @@ func (qrs QuestionReplierService) Execute(ctx context.Context) error {
 func (qrs QuestionReplierService) handleHook(res http.ResponseWriter, req *http.Request) {
 	var hookData WebhookData = *new(WebhookData)
 
-	rawNoteData, _ := io.ReadAll(req.Response.Body)
+	rawNoteData, readerror := io.ReadAll(req.Body)
+	if readerror != nil {
+		log.Fatal("readerror:", readerror.Error())
+	}
 	json.Unmarshal(rawNoteData, &hookData)
 
 	if (hookData.HookType != TYPE_MENTION) || (hookData.HookType != TYPE_REPLY) {
@@ -49,6 +53,8 @@ func (qrs QuestionReplierService) handleHook(res http.ResponseWriter, req *http.
 		res.Write([]byte("failed"))
 
 		return
+	} else {
+		res.Write([]byte("accepted"))
 	}
 
 	extracted := qrs.extractor.Extract(hookData.Body.Note.Text)
@@ -63,6 +69,5 @@ func (qrs QuestionReplierService) handleHook(res http.ResponseWriter, req *http.
 	}
 
 	qrs.mk.SendReply(hookData.Body.Note.NoteID, generated.Result, hookData.Body.Note.Visibility)
-
-	res.Write([]byte("Hello"))
+	return
 }
