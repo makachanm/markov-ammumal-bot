@@ -59,6 +59,9 @@ func (qrs QuestionReplierService) handleHook(res http.ResponseWriter, req *http.
 		res.Write([]byte("accepted"))
 	}
 
+	fmt.Println("New request arrived")
+	fmt.Println("Data: ", hookData.Body.Note.Text)
+
 	extractor := core.NewImportantExtractor(qrs.uniModel)
 
 	extracted := extractor.Extract(hookData.Body.Note.Text)

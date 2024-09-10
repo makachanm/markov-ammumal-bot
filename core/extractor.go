@@ -29,6 +29,7 @@ func (ie *ImportantExtractor) Extract(input string) tokenTupleGroups {
 		trimedstrings = append(trimedstrings, strings[0])
 	}
 	trimedstrings = RemoveStopwords(trimedstrings)
+	fmt.Println(trimedstrings)
 
 	var totalLength int = 0
 	for _, word := range trimedstrings {
