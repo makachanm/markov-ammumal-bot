@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -13,14 +14,14 @@ import (
 type QuestionReplierService struct {
 	desc string
 
-	extractor core.ImportantExtractor
+	uniModel  core.UniGramModel
 	generator core.PredictionGenerator
 	mk        misskey.Misskey
 }
 
 func NewQuestionReplierService(uc core.UniGramModel, gen core.PredictionGenerator, mks misskey.Misskey) QuestionReplierService {
 	return QuestionReplierService{
-		extractor: core.NewImportantExtractor(uc),
+		uniModel:  uc,
 		generator: gen,
 		mk:        mks,
 	}
@@ -48,7 +49,8 @@ func (qrs QuestionReplierService) handleHook(res http.ResponseWriter, req *http.
 	}
 	json.Unmarshal(rawNoteData, &hookData)
 
-	if (hookData.HookType != TYPE_MENTION) || (hookData.HookType != TYPE_REPLY) {
+	if !(hookData.HookType == TYPE_MENTION || hookData.HookType == TYPE_REPLY) {
+		fmt.Println("request: skip")
 		res.WriteHeader(http.StatusNotAcceptable)
 		res.Write([]byte("failed"))
 
@@ -57,7 +59,9 @@ func (qrs QuestionReplierService) handleHook(res http.ResponseWriter, req *http.
 		res.Write([]byte("accepted"))
 	}
 
-	extracted := qrs.extractor.Extract(hookData.Body.Note.Text)
+	extractor := core.NewImportantExtractor(qrs.uniModel)
+
+	extracted := extractor.Extract(hookData.Body.Note.Text)
 
 	var generated core.PredictionResult
 	for _, token := range extracted {
@@ -69,5 +73,4 @@ func (qrs QuestionReplierService) handleHook(res http.ResponseWriter, req *http.
 	}
 
 	qrs.mk.SendReply(hookData.Body.Note.NoteID, generated.Result, hookData.Body.Note.Visibility)
-	return
 }

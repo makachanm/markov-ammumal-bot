@@ -36,12 +36,22 @@ func RemoveStopwords(input []string) []string {
 	filtered := make([]string, 0)
 
 	for _, words := range input {
-		for _, stop := range Stopwords {
+		var passed bool = false
 
+		for _, stop := range Stopwords {
 			if strings.HasSuffix(words, stop) {
-				cutedword, _ := strings.CutSuffix(words, stop)
+				cutedword := strings.ReplaceAll(words, stop, "")
 				filtered = append(filtered, cutedword)
+
+				passed = true
+				break
+			} else {
+				continue
 			}
+		}
+
+		if !passed {
+			filtered = append(filtered, words)
 		}
 	}
 
