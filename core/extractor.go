@@ -17,7 +17,9 @@ func NewImportantExtractor(unictx UniGramModel) ImportantExtractor {
 	}
 }
 
-func (ie *ImportantExtractor) Extract(input string) tokenTupleGroups {
+func (ie *ImportantExtractor) Extract(rawinput string) tokenTupleGroups {
+	input := stringFilter(rawinput)
+
 	extractUnimodel := NewUniGramModel()
 	extractUnimodel.Update(strings.Join(RemoveStopwords(strings.Split(input, " ")), " "))
 	targerUniData := extractUnimodel.GetProabilityWeight()
@@ -25,7 +27,7 @@ func (ie *ImportantExtractor) Extract(input string) tokenTupleGroups {
 	candidates := make(tokenTupleGroups, 0)
 
 	trimedstrings := make([]string, 0)
-	for _, strings := range extractUnimodel.gramlize(stringFilter(input)) {
+	for _, strings := range extractUnimodel.gramlize(input) {
 		trimedstrings = append(trimedstrings, strings[0])
 	}
 	trimedstrings = RemoveStopwords(trimedstrings)
