@@ -43,8 +43,15 @@ func (is *InteralServices) InitService() {
 	is.Scheduler.Start(ctx)
 	fmt.Println("Scheduler stated")
 
-	//is.Scheduler.ScheduleJob(quartz.NewJobDetail(is.AutoGen, quartz.NewJobKey("AutoGeneration")), quartz.NewSimpleTrigger(time.Second*20))
-	is.Scheduler.ScheduleJob(quartz.NewJobDetail(is.QuestionReply, quartz.NewJobKey("QuetionReplier")), quartz.NewRunOnceTrigger(0))
+	if is.Configuration.Cron.UseCron {
+		fmt.Println("Autopost attaching...")
+		trigger, _ := quartz.NewCronTrigger(is.Configuration.Cron.Crontab)
+		is.Scheduler.ScheduleJob(quartz.NewJobDetail(is.AutoGen, quartz.NewJobKey("AutoGeneration")), trigger)
+	}
+	if is.Configuration.UseReply {
+		fmt.Println("Autoreply attaching...")
+		is.Scheduler.ScheduleJob(quartz.NewJobDetail(is.QuestionReply, quartz.NewJobKey("QuetionReplier")), quartz.NewRunOnceTrigger(0))
+	}
 
 	is.Scheduler.Wait(ctx)
 }

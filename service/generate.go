@@ -33,11 +33,10 @@ func (ags AutoGenerationService) Description() string {
 }
 
 func (ags AutoGenerationService) Execute(c context.Context) error {
-	Generator(ags.config, ags.mk, ags.predictor)
-	return nil
+	return Generator(ags.config, ags.mk, ags.predictor)
 }
 
-func Generator(config utils.Config, mk misskey.Misskey, predictor core.PredictionGenerator) {
+func Generator(config utils.Config, mk misskey.Misskey, predictor core.PredictionGenerator) error {
 	var vrange misskey.ViewRange
 
 	switch config.ViewRange {
@@ -88,4 +87,5 @@ func Generator(config utils.Config, mk misskey.Misskey, predictor core.Predictio
 
 	fmt.Println(presult)
 	mk.SendNote(text, vrange)
+	return nil
 }
