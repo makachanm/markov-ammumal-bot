@@ -12,6 +12,7 @@ const TYPE_FOLLOW HookType = "follow"
 type WebhookData struct {
 	ServerURL string   `json:"server"`
 	HookType  HookType `json:"type"`
+	UserID    string   `json:"userId"`
 
 	Body hookBody `json:"body,omitempty"`
 }
@@ -21,11 +22,15 @@ type hookBody struct {
 }
 
 type MisskeyHookNote struct {
-	NoteID string `json:"id"`
-	UserID string `json:"userId"`
+	NoteID string          `json:"id"`
+	User   MisskeyHookUser `json:"user"`
 
 	LocalOnly  bool              `json:"localOnly"`
 	Visibility misskey.ViewRange `json:"visibility"`
 	Text       string            `json:"text"`
 	CW         string            `json:"cw"`
+}
+
+type MisskeyHookUser struct {
+	UserID string `json:"id"`
 }

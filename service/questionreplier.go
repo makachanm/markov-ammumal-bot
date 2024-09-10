@@ -59,6 +59,11 @@ func (qrs QuestionReplierService) handleHook(res http.ResponseWriter, req *http.
 		res.Write([]byte("accepted"))
 	}
 
+	if hookData.Body.Note.User.UserID == hookData.UserID {
+		fmt.Println("request: reply from myself : skip")
+		return
+	}
+
 	fmt.Println("New request arrived")
 	fmt.Println("Data: ", hookData.Body.Note.Text)
 
