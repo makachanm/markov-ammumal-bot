@@ -75,5 +75,7 @@ func (qrs QuestionReplierService) handleHook(res http.ResponseWriter, req *http.
 		}
 	}
 
+	fmt.Println(generated)
+
 	qrs.mk.SendReply(hookData.Body.Note.NoteID, generated.Result, hookData.Body.Note.Visibility)
 }
