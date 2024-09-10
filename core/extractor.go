@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -18,15 +19,13 @@ func NewImportantExtractor(unictx UniGramModel) ImportantExtractor {
 
 func (ie *ImportantExtractor) Extract(input string) tokenTupleGroups {
 	extractUnimodel := NewUniGramModel()
-	//extractBiModel := NewBiGramModel()
 	extractUnimodel.Update(strings.Join(RemoveStopwords(strings.Split(input, " ")), " "))
-	//extractBiModel.Update(input)
 	targerUniData := extractUnimodel.GetProabilityWeight()
 
 	candidates := make(tokenTupleGroups, 0)
 
 	trimedstrings := make([]string, 0)
-	for _, strings := range extractUnimodel.gramlize(input) {
+	for _, strings := range extractUnimodel.gramlize(stringFilter(input)) {
 		trimedstrings = append(trimedstrings, strings[0])
 	}
 	trimedstrings = RemoveStopwords(trimedstrings)
@@ -65,4 +64,15 @@ func (ie *ImportantExtractor) Extract(input string) tokenTupleGroups {
 	fmt.Println(candidates)
 
 	return candidates
+}
+
+func stringFilter(input string) string {
+	//'https?:\/\/.*?[\s+]'gm
+	removeLink := regexp.MustCompile(`'https?:\/\/.*?[\s+]'gm`)
+	removeMention := regexp.MustCompile(`\S*@\S*\S*@\S*\s?`)
+
+	linkClear := removeLink.ReplaceAllString(input, "")
+	mentionClear := removeMention.ReplaceAllString(linkClear, "")
+
+	return mentionClear
 }
