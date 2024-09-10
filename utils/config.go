@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"encoding/json"
@@ -14,11 +14,19 @@ type Config struct {
 	TwitterData   []string `json:"twitterData"`
 
 	Pretrain configPreTrain `json:"pretrain"`
+	Cron     cronSettings   `json:"cron"`
+
+	UseReply bool `json:"usereply"`
 }
 
 type configPreTrain struct {
 	UsePretrain bool   `json:"usepretrain"`
 	DataPath    string `json:"path"`
+}
+
+type cronSettings struct {
+	UseCron bool   `json:"usecron"`
+	Crontab string `json:"crontab"`
 }
 
 func ReadConfig(path string) Config {
