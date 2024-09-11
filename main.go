@@ -64,62 +64,6 @@ func main() {
 		fmt.Println("Running with headless mode")
 		service.Generator(config, misskey, predictr)
 	}
-
-	/*
-
-		var vrange misskey.ViewRange
-
-		switch config.ViewRange {
-		case "public":
-			vrange = misskey.PUBLIC
-		case "home":
-			vrange = misskey.HOME
-		case "private":
-			vrange = misskey.PRIVATE
-		default:
-			vrange = misskey.HOME
-		}
-
-		mk := misskey.NewMisskeyTools(config.MisskeyToken, config.MisskeyServer)
-
-		topic := config.StartTopic[rand.Intn(len(config.StartTopic))]
-
-		if topic == "random" {
-			for {
-				pick := func(length int, dict core.UnigramProabilityCollections) string {
-					rndn := rand.Intn(length)
-					for key := range dict {
-						if rndn == 0 {
-							return key
-						}
-						rndn--
-					}
-					panic("unreachable!")
-				}
-
-				topic = pick(len(predictr.UniModelProb), predictr.UniModelProb)
-
-				if _, e := url.ParseRequestURI(topic); e != nil {
-					break
-				}
-			}
-		}
-
-		var presult core.PredictionResult
-
-		presult = predictr.PredictSeq(topic, 0)
-
-		text := presult.Result
-
-		text = strings.ReplaceAll(text, "&amp;", "&")
-		text = strings.ReplaceAll(text, "&lt;", "<")
-		text = strings.ReplaceAll(text, "&gt;", ">")
-		text = strings.ReplaceAll(text, "&quot;", "\"")
-		text = strings.ReplaceAll(text, "&apos;", "'")
-
-		fmt.Println(presult)
-		mk.SendNote(text, vrange)
-	*/
 }
 
 func pretrain(c utils.Config, name string) {
